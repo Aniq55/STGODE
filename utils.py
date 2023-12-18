@@ -46,8 +46,6 @@ def read_data(args):
     
     else:
         data_file = f"{filepath}data_{filename}.npz"
-        
-        
         data = np.load(data_file)['data']
     
     # PEMS04 == shape: (16992, 307, 3)    feature: flow,occupy,speed
