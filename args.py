@@ -9,8 +9,8 @@ parser.add_argument('--epochs', type=int, default=100, help='train epochs')
 parser.add_argument('--batch-size', type=int, default=16, help='batch size')
 
 parser.add_argument('--filename', type=str, default='synth_05')
-parser.add_argument('--train-ratio', type=float, default=0.6, help='the ratio of training dataset')
-parser.add_argument('--valid-ratio', type=float, default=0.2, help='the ratio of validating dataset')
+parser.add_argument('--train_ratio', type=float, default=0.6, help='the ratio of training dataset')
+parser.add_argument('--valid_ratio', type=float, default=0.1, help='the ratio of validating dataset')
 parser.add_argument('--his-length', type=int, default=12, help='the length of history time series of input')
 parser.add_argument('--pred-length', type=int, default=12, help='the length of target time series for prediction')
 

@@ -7,6 +7,7 @@ from torch.optim.lr_scheduler import StepLR, OneCycleLR
 import time
 from tqdm import tqdm
 from loguru import logger
+import logging
 
 from args import args
 from model import ODEGCN
@@ -79,6 +80,7 @@ def main(args):
     A_sp_wave = get_normalized_adj(sp_matrix).to(device)
     A_se_wave = get_normalized_adj(dtw_matrix).to(device)
 
+    t_start = time.perf_counter()
     net = ODEGCN(num_nodes=data.shape[1], 
                 num_features=data.shape[2], 
                 num_timesteps_input=args.his_length, 
@@ -119,7 +121,27 @@ def main(args):
 
     net.load_state_dict(torch.load(f'net_params_{args.filename}_{args.num_gpu}.pkl'))
     test_rmse, test_mae, test_mape = eval(test_loader, net, std, mean, device)
+    
+    t_end = time.perf_counter()
+    t_test = (t_end - t_start)/(((1-(args.train_ratio+args.valid_ratio))*data.shape[0])*data.shape[1])
+    
     print(f'##on test data## rmse loss: {test_rmse}, mae loss: {test_mae}, mape loss: {test_mape}')
+    
+    logging.basicConfig(filename=f"/home/chri6578/Documents/STGODE/logs/{args.filename}.txt",
+                    level=logging.INFO)
+
+    log_data = [
+        'STGODE',
+        str(args.pred_length),
+        str(args.train_ratio+args.valid_ratio),
+        args.filename,
+        f"{test_mae:.2f}",
+        f"{test_rmse:.2f}",
+        f"{np.log10(t_test):.2f}"
+    ]
+
+    log_string = '\t'.join(log_data)
+    logging.info(log_string)
 
 
 if __name__ == '__main__':

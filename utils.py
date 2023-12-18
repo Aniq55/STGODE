@@ -35,13 +35,13 @@ def read_data(args):
         sp_matrix: array, spatial adjacency matrix
     """
     filename = args.filename
-    file = files[filename]
     filepath = "./data/"
     # data_test01.npz
     if args.remote:
         filepath = '/home/chri6578/Documents/GG_SPP/markovspace/dataset/synthetic/'
     
     if filename in files:
+        file = files[filename]
         data = np.load(filepath + file[0])['data']
     
     else:
