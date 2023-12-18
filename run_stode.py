@@ -16,7 +16,7 @@ from eval import masked_mae_np, masked_mape_np, masked_rmse_np
 
 def train(loader, model, optimizer, criterion, device):
     batch_loss = 0
-    for idx, (inputs, targets) in enumerate(tqdm(loader)):
+    for idx, (inputs, targets) in enumerate(loader):
         model.train()
         optimizer.zero_grad()
 
@@ -36,7 +36,7 @@ def eval(loader, model, std, mean, device):
     batch_rmse_loss = 0  
     batch_mae_loss = 0
     batch_mape_loss = 0
-    for idx, (inputs, targets) in enumerate(tqdm(loader)):
+    for idx, (inputs, targets) in enumerate(loader):
         model.eval()
 
         inputs = inputs.to(device)
@@ -90,30 +90,30 @@ def main(args):
     optimizer = torch.optim.AdamW(net.parameters(), lr=lr)
     criterion = nn.SmoothL1Loss()
 
-    best_valid_rmse = 1000 
+    best_valid_rmse = 1e9
     scheduler = StepLR(optimizer, step_size=50, gamma=0.5)
 
-    for epoch in range(1, args.epochs+1):
-        print("=====Epoch {}=====".format(epoch))
-        print('Training...')
+    for epoch in tqdm(range(1, args.epochs+1)):
+        # print("=====Epoch {}=====".format(epoch))
+        # print('Training...')
         loss = train(train_loader, net, optimizer, criterion, device)
-        print('Evaluating...')
+        # print('Evaluating...')
         train_rmse, train_mae, train_mape = eval(train_loader, net, std, mean, device)
         valid_rmse, valid_mae, valid_mape = eval(valid_loader, net, std, mean, device)
 
         if valid_rmse < best_valid_rmse:
             best_valid_rmse = valid_rmse
-            print('New best results!')
+            # print('New best results!')
             torch.save(net.state_dict(), f'net_params_{args.filename}_{args.num_gpu}.pkl')
 
-        if args.log:
-            logger.info(f'\n##on train data## loss: {loss}, \n' + 
-                        f'##on train data## rmse loss: {train_rmse}, mae loss: {train_mae}, mape loss: {train_mape}\n' +
-                        f'##on valid data## rmse loss: {valid_rmse}, mae loss: {valid_mae}, mape loss: {valid_mape}\n')
-        else:
-            print(f'\n##on train data## loss: {loss}, \n' + 
-                f'##on train data## rmse loss: {train_rmse}, mae loss: {train_mae}, mape loss: {train_mape}\n' +
-                f'##on valid data## rmse loss: {valid_rmse}, mae loss: {valid_mae}, mape loss: {valid_mape}\n')
+        # if args.log:
+        #     logger.info(f'\n##on train data## loss: {loss}, \n' + 
+        #                 f'##on train data## rmse loss: {train_rmse}, mae loss: {train_mae}, mape loss: {train_mape}\n' +
+        #                 f'##on valid data## rmse loss: {valid_rmse}, mae loss: {valid_mae}, mape loss: {valid_mape}\n')
+        # else:
+        #     print(f'\n##on train data## loss: {loss}, \n' + 
+        #         f'##on train data## rmse loss: {train_rmse}, mae loss: {train_mae}, mape loss: {train_mape}\n' +
+        #         f'##on valid data## rmse loss: {valid_rmse}, mae loss: {valid_mae}, mape loss: {valid_mape}\n')
         
         scheduler.step()
 

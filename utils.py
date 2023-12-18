@@ -14,7 +14,10 @@ files = {
     'pems08': ['PEMS08/pems08.npz', 'PEMS08/distance.csv'],
     'pemsbay': ['PEMSBAY/pems_bay.npz', 'PEMSBAY/distance.csv'],
     'pemsD7M': ['PeMSD7M/PeMSD7M.npz', 'PeMSD7M/distance.csv'],
-    'pemsD7L': ['PeMSD7L/PeMSD7L.npz', 'PeMSD7L/distance.csv']
+    'pemsD7L': ['PeMSD7L/PeMSD7L.npz', 'PeMSD7L/distance.csv'],
+    'synth_01': ['SYNTH/data_01.npz', 'SYNTH/distance_01.csv'],
+    'synth_02': ['SYNTH/data_02.npz', 'SYNTH/distance_02.csv'],
+    'synth_05': ['SYNTH/data_05.npz', 'SYNTH/distance_05.csv']
 }
 
 def read_data(args):
@@ -34,9 +37,19 @@ def read_data(args):
     filename = args.filename
     file = files[filename]
     filepath = "./data/"
+    # data_test01.npz
     if args.remote:
-        filepath = '/home/lantu.lqq/ftemp/data/'
-    data = np.load(filepath + file[0])['data']
+        filepath = '/home/chri6578/Documents/GG_SPP/markovspace/dataset/synthetic/'
+    
+    if filename in files:
+        data = np.load(filepath + file[0])['data']
+    
+    else:
+        data_file = f"{filepath}data_{filename}.npz"
+        
+        
+        data = np.load(data_file)['data']
+    
     # PEMS04 == shape: (16992, 307, 3)    feature: flow,occupy,speed
     # PEMSD7M == shape: (12672, 228, 1)
     # PEMSD7L == shape: (12672, 1026, 1)
@@ -84,8 +97,13 @@ def read_data(args):
     
     # use continuous spatial matrix
     if not os.path.exists(f'data/{filename}_spatial_distance.npy'):
-        with open(filepath + file[1], 'r') as fp:
-            dist_matrix = np.zeros((num_node, num_node)) + np.float('inf')
+        if filename in files:
+            distance_file = filepath + file[1]
+        else:
+            distance_file = f"{filepath}distance_{filename}.csv"
+        
+        with open(distance_file, 'r') as fp:
+            dist_matrix = np.zeros((num_node, num_node)) + np.float32('inf')
             file = csv.reader(fp)
             for line in file:
                 break
@@ -106,8 +124,8 @@ def read_data(args):
 
     dist_matrix = np.load(f'data/{filename}_spatial_distance.npy')
     # normalization
-    std = np.std(dist_matrix[dist_matrix != np.float('inf')])
-    mean = np.mean(dist_matrix[dist_matrix != np.float('inf')])
+    std = np.std(dist_matrix[dist_matrix != np.float32('inf')])
+    mean = np.mean(dist_matrix[dist_matrix != np.float32('inf')])
     dist_matrix = (dist_matrix - mean) / std
     sigma = args.sigma2
     sp_matrix = np.exp(- dist_matrix**2 / sigma**2)
@@ -129,7 +147,7 @@ def get_normalized_adj(A):
     D[D <= 10e-5] = 10e-5    # Prevent infs
     diag = np.reciprocal(np.sqrt(D))
     A_wave = np.multiply(np.multiply(diag.reshape((-1, 1)), A),
-                         diag.reshape((1, -1)))
+                        diag.reshape((1, -1)))
     A_reg = alpha / 2 * (np.eye(A.shape[0]) + A_wave)
     return torch.from_numpy(A_reg.astype(np.float32))
 

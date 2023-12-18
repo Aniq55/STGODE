@@ -5,10 +5,10 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--remote', action='store_true', help='the code run on a server')
 parser.add_argument('--num-gpu', type=int, default=0, help='the number of the gpu to use')
-parser.add_argument('--epochs', type=int, default=200, help='train epochs')
+parser.add_argument('--epochs', type=int, default=100, help='train epochs')
 parser.add_argument('--batch-size', type=int, default=16, help='batch size')
 
-parser.add_argument('--filename', type=str, default='pems04')
+parser.add_argument('--filename', type=str, default='synth_05')
 parser.add_argument('--train-ratio', type=float, default=0.6, help='the ratio of training dataset')
 parser.add_argument('--valid-ratio', type=float, default=0.2, help='the ratio of validating dataset')
 parser.add_argument('--his-length', type=int, default=12, help='the length of history time series of input')
